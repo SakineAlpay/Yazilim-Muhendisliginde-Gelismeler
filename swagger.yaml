@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  title: İngilizce Öğrenme Uygulaması API (Sosyal Sürüm)
+  description: |
+    Son eklenen Skor Tablosu, Profil ve Arkadaş Takip özelliklerini içeren API.
+  version: 1.1.0
+servers:
+  - url: http://127.0.0.1:5000/api
+    description: Yerel Geliştirme Ortamı
+tags:
+  - name: Kimlik Doğrulama
+  - name: Öğrenme Modülleri
+  - name: Sosyal ve Skor
+    description: Liderlik Tablosu ve Arkadaş Takibi
+
+paths:
+  /auth/register:
+    post:
+      tags: [Kimlik Doğrulama]
+      summary: Yeni Kullanıcı Kaydı
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string, example: yeni_kullanici_sosyal }
+                password: { type: string, example: sifre123 }
+      responses:
+        '201': { description: Kayıt başarılı. }
+
+  /auth/login:
+    post:
+      tags: [Kimlik Doğrulama]
+      summary: Kullanıcı Girişi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string, example: user1 }
+                password: { type: string, example: pass1 }
+      responses:
+        '200': { description: Giriş başarılı. }
+
+  # --- Skor ve Sosyal ---
+  /scoreboard:
+    get:
+      tags: [Sosyal ve Skor]
+      summary: Liderlik Tablosunu Getir
+      description: Tüm kullanıcıları puana göre sıralar.
+      responses:
+        '200': { description: Skor listesi döndürüldü. }
+  
+  /profile/{username}:
+    get:
+      tags: [Sosyal ve Skor]
+      summary: Kullanıcı Profilini ve İstatistiklerini Getir
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema: { type: string, example: user1 }
+      responses:
+        '200': { description: Kullanıcı profili başarıyla döndürüldü. }
+
+  /social/add_friend:
+    post:
+      tags: [Sosyal ve Skor]
+      summary: Arkadaş Ekleme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_user: { type: string, example: user1 }
+                friend_to_add: { type: string, example: user_to_add }
+      responses:
+        '200': { description: Arkadaşlık isteği başarılı (Mock onaylandı). }
+
+  /social/friends:
+    get:
+      tags: [Sosyal ve Skor]
+      summary: Arkadaş Listesini Getir
+      description: Kullanıcının arkadaş listesini skorlarıyla birlikte döndürür.
+      parameters:
+        - in: query
+          name: current_user
+          schema: { type: string, default: user1 }
+      responses:
+        '200': { description: Arkadaş listesi ve skorları döndürüldü. }
+
+  # --- Diğer Modüller ---
+  /words:
+    get:
+      tags: [Öğrenme Modülleri]
+      summary: Kelime Listesini Getir
+      responses:
+        '200': { description: Kelime listesi döndürüldü. }
+        
+  /speech/analyze:
+    post:
+      tags: [Analiz ve Değerlendirme]
+      summary: Telaffuz Analizi (Mock)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                audio_file: { type: string, example: "ses_kaydi.mp3" }
+      responses:
+        '200': { description: Analiz sonucu başarılı. }
+        
+  /writing/check:
+    post:
+      tags: [Analiz ve Değerlendirme]
+      summary: Yazma ve Dilbilgisi Kontrolü (Mock)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: { type: string, example: "The student has went to the library." }
+      responses:
+        '200': { description: Kontrol ve not başarılı. }
