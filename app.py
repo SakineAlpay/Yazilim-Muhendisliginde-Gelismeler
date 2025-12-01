@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 import time
 from datetime import date 
 from flask_cors import CORS 
+from datetime import date
 
 MOCK_USERS = {
     "user1": {"password": "pass1", "level": "B1", "score": 1500, "friends": ["user2", "user3"]},
@@ -35,15 +36,20 @@ def create_app():
         username = data.get('username')
         password = data.get('password')
 
-        if username in MOCK_USERS and MOCK_USERS[username]['password'] == password:
-            user_data = MOCK_USERS[username]
-            return jsonify({
-                "success": True,
-                "message": "Giriş başarılı.",
-                "user": username,
-                "level": user_data['level'],
-                "score": user_data['score']
-            }), 200
+       if username in MOCK_USERS and MOCK_USERS[username]['password'] == password:
+    user_data = MOCK_USERS[username]
+
+    # Yeni eklenen özellik: Son giriş tarihini kaydet ve döndür
+    last_login = date.today().strftime("%Y-%m-%d")
+    user_data['last_login'] = last_login 
+
+    return jsonify({
+        "success": True,
+        "user": username,
+        "level": user_data['level'],
+        "stats": user_data['stats'],
+        "last_login_date": last_login # Dönüşe ekledik
+    }), 200
         return jsonify({"success": False, "message": "Geçersiz kullanıcı adı veya şifre."}), 401
 
     @app.route('/api/auth/register', methods=['POST'])
@@ -214,4 +220,5 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
+
     app.run(debug=True, port=5000)
