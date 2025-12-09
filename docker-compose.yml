@@ -1,5 +1,6 @@
-version: '3.8'
+
 services:
+  # Backend API Servisi (Port 8000)
   ingilizce_api:
     build: .
     image: ingilizce-app:latest
@@ -7,6 +8,28 @@ services:
     ports:
       - "8000:5000"
     volumes:
-      - ./app.py:/app/app.py
-      - ./requirements.txt:/app/requirements.txt
+      - .:/app 
     restart: always
+    environment:
+      - FLASK_ENV=development
+      - SECRET_KEY=super-secret-key-2024
+    networks:
+      - ingilizce_network
+
+  # Frontend Web Servisi (Port 8080)
+  ingilizce_frontend:
+    image: nginx:alpine
+    container_name: ingilizce_web_frontend
+    ports:
+      - "8090:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    restart: always
+    depends_on:
+      - ingilizce_api
+    networks:
+      - ingilizce_network
+
+networks:
+  ingilizce_network:
+    driver: bridge
