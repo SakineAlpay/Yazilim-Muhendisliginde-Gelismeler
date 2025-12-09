@@ -16,7 +16,7 @@ services:
     networks:
       - ingilizce_network
 
-  # Frontend Web Servisi (Port 8080)
+  # Frontend Web Servisi (Port 8090)
   ingilizce_frontend:
     image: nginx:alpine
     container_name: ingilizce_web_frontend
@@ -33,3 +33,4 @@ services:
 networks:
   ingilizce_network:
     driver: bridge
+
