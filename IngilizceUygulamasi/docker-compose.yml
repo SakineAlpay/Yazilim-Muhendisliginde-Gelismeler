@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Veritabanı Servisi
+  postgres:
+    image: postgres:15-alpine
+    container_name: ingilizce_postgres_db
+    environment:
+      POSTGRES_USER: learnhub
+      POSTGRES_PASSWORD: learnhub2024
+      POSTGRES_DB: learnhub_db  # Backend'in aradığı isimle eşleşti
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ingilizce_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U learnhub -d learnhub_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Servisi (Port 8000)
+  ingilizce_api:
+    build: .
+    image: ingilizce-app:latest
+    container_name: ingilizce_api_backend
+    ports:
+      - "8000:5000"
+    volumes:
+      - .:/app 
+    restart: always
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+      - SECRET_KEY=super-secret-key-2024
+      - DATABASE_URL=postgresql://learnhub:learnhub2024@postgres:5432/learnhub_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ingilizce_network
+    command: python app.py
+
+  # Frontend Web Servisi (Port 8090)
+  ingilizce_frontend:
+    image: nginx:alpine
+    container_name: ingilizce_web_frontend
+    ports:
+      - "8090:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+    restart: always
+    depends_on:
+      - ingilizce_api
+    networks:
+      - ingilizce_network
+
+networks:
+  ingilizce_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

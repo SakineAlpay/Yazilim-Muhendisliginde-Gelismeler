@@ -1,0 +1,29 @@
+Projeyi Çalıştırma
+
+Projenin çalıştırılması için Docker Desktop uygulamasının aktif olması gerekmektedir.
+
+1. Dockerfile ve İmaj Oluşturma
+
+Dockerfile, uygulamanın konteyner imajını oluşturur.
+
+Kullanım Talimatı (Örnek bir satır):
+
+docker build -t ingilizce-app:latest .
+
+
+2. Konteyneri Başlatma (docker-compose)
+
+docker-compose.yml dosyası, tek bir komutla imajı oluşturur, konteyneri başlatır ve host makinenin 8000 numaralı portuna yönlendirir.
+
+Kullanım Talimatı:
+
+docker-compose up -d
+
+
+Konteynerin çalışır durumda olduğunu kontrol etmek için docker-compose ps komutunu kullanabilirsiniz.
+
+3. API Erişimi
+
+Uygulama başarıyla başlatıldıktan sonra, tüm API endpoint'lerine (Swagger, Postman veya tarayıcı üzerinden) şu adresten erişilebilir:
+
+http://127.0.0.1:8000/api/words
