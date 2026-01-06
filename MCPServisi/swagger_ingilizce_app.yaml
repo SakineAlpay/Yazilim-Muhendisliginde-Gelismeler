@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: İngilizce Öğrenme Uygulaması API (Sosyal & İstatistikli)
+  description: |
+    Mobil uygulama için geliştirilmiş, öğrenme modülleri, detaylı istatistikler ve sosyal özellikler içeren REST API.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Docker/Yerel Geliştirme Ortamı
+tags:
+  - name: Kimlik Doğrulama
+  - name: Öğrenme Modülleri
+  - name: İstatistikler ve Sosyal
+  - name: Analiz ve Değerlendirme
+
+paths:
+  # --- Kimlik Doğrulama ---
+  /auth/login:
+    post:
+      tags: [Kimlik Doğrulama]
+      summary: Kullanıcı Girişi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string, example: user1 }
+                password: { type: string, example: pass1 }
+      responses:
+        '200': { description: Giriş başarılı, istatistikler ve son giriş tarihi döndürüldü. }
+  
+  /auth/register:
+    post:
+      tags: [Kimlik Doğrulama]
+      summary: Yeni Kullanıcı Kaydı
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string, example: yeni_kullanici }
+                password: { type: string, example: sifre123 }
+      responses:
+        '201': { description: Kayıt başarılı. }
+
+  # --- Öğrenme Modülleri ---
+  /words:
+    get:
+      tags: [Öğrenme Modülleri]
+      summary: Kelime Listesini Getir
+      responses:
+        '200': { description: Kelime listesi döndürüldü. }
+
+  /words/repeat:
+    post:
+      tags: [Öğrenme Modülleri]
+      summary: Kelime İlerlemesini Kaydet ve İstatistikleri Güncelle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                word_id: { type: integer, example: 3 }
+                username: { type: string, example: user1 }
+      responses:
+        '200': { description: İlerleme kaydedildi, güncel istatistikler döndürüldü. }
+
+  /grammar/quiz:
+    post:
+      tags: [Öğrenme Modülleri]
+      summary: Dilbilgisi Quizini Gönder ve İstatistikleri Güncelle
+      responses:
+        '200': { description: Quiz sonucu ve güncel istatistikler döndürüldü. }
+
+  /tests/submit:
+    post:
+      tags: [Öğrenme Modülleri]
+      summary: Test Cevaplarını Gönder, Değerlendir ve İstatistikleri Güncelle
+      responses:
+        '200': { description: Değerlendirme sonucu ve güncel istatistikler döndürüldü. }
+
+  # --- İstatistikler ve Sosyal ---
+  /stats/{username}:
+    get:
+      tags: [İstatistikler ve Sosyal]
+      summary: Kullanıcı İstatistiklerini Getir
+      parameters:
+        - in: path
+          name: username
+          schema: { type: string }
+          required: true
+      responses:
+        '200': { description: Detaylı öğrenme istatistikleri, seviye ve skor döndürüldü. }
+        
+  /profile/{username}:
+    get:
+      tags: [İstatistikler ve Sosyal]
+      summary: Kullanıcı Profilini Getir
+      responses:
+        '200': { description: Kullanıcının temel profil ve istatistik bilgileri döndürüldü. }
+
+  /scoreboard:
+    get:
+      tags: [İstatistikler ve Sosyal]
+      summary: Global Skor Tahtasını Getir
+      responses:
+        '200': { description: Tüm kullanıcıların skor ve seviyeye göre sıralı listesi döndürüldü. }
+
+  /social/add_friend:
+    post:
+      tags: [İstatistikler ve Sosyal]
+      summary: Arkadaş Ekleme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_user: { type: string, example: user2 }
+                friend_to_add: { type: string, example: user3 }
+      responses:
+        '200': { description: Arkadaş ekleme işlemi başarılı. }
+
+  /social/friends:
+    get:
+      tags: [İstatistikler ve Sosyal]
+      summary: Arkadaş Listesini Getir
+      parameters:
+        - in: query
+          name: current_user
+          schema: { type: string, default: user1 }
+      responses:
+        '200': { description: Arkadaşların skor ve seviye bilgileriyle listesi döndürüldü. }
+
+  # --- Analiz ve Değerlendirme ---
+  /speech/analyze:
+    post:
+      tags: [Analiz ve Değerlendirme]
+      summary: Telaffuz Analizi (Mock)
+      responses:
+        '200': { description: Analiz sonucu başarılı. }
+
+  /writing/check:
+    post:
+      tags: [Analiz ve Değerlendirme]
+      summary: Yazma ve Dilbilgisi Kontrolü (Mock)
+      responses:
+        '200': { description: Kontrol ve not başarılı. }

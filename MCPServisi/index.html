@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnHub Ultra Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #6366f1; --accent: #ec4899; --bg: #f8fafc; --text: #1e293b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: white; border-right: 1px solid #e2e8f0; position: fixed; height: 100vh; display: none; flex-direction: column; z-index: 100; }
+        .sidebar.active { display: flex; }
+        .logo { padding: 2rem; font-size: 1.5rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #f1f5f9; }
+        .nav-item { padding: 1rem 2rem; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #64748b; transition: 0.3s; }
+         .sidebar {
+    /* Mevcut diğer kodların... */
+    display: flex;
+    flex-direction: column;
+}
+        .nav-item:hover, .nav-item.active { background: #f1f5f9; color: var(--primary); border-right: 4px solid var(--primary); }
+
+
+        /* MAIN CONTENT */
+        .main { flex-grow: 1; padding: 2rem; transition: 0.3s; width: 100%; margin-left: 0; }
+        .main.shifted { margin-left: 260px; }
+
+        /* AUTH CONTAINER */
+        #authOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #6366f1, #a855f7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .auth-card { background: white; padding: 3rem; border-radius: 2rem; width: 450px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #f1f5f9; }
+        .tab { padding: 0.5rem 1rem; cursor: pointer; color: #64748b; font-weight: 600; }
+        .tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+        /* COMPONENTS */
+        .card { background: white; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .xp-bar { background: #e2e8f0; height: 12px; border-radius: 6px; margin: 1rem 0; overflow: hidden; }
+        .xp-fill { background: linear-gradient(90deg, var(--primary), var(--accent)); height: 100%; width: 0%; transition: 1s ease; }
+        
+        /* READER */
+        #reader { position: fixed; inset: 0; background: white; z-index: 3000; padding: 4rem; display: none; overflow-y: auto; }
+        .btn { padding: 0.8rem 1.5rem; border-radius: 0.8rem; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; background: var(--primary); color: white; }
+        input { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 2px solid #f1f5f9; border-radius: 10px; }
+        .hidden { display: none !important; }
+
+        .switch {
+    width: 50px;
+    height: 26px;
+    background: #cbd5e1;
+    border-radius: 13px;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.switch.on {
+    background: #10b981;
+}
+.switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+.switch.on::after {
+    left: 27px;
+}
+
+    </style>
+</head>
+<body>
+
+
+
+
+
+
+
+    <div id="authOverlay">
+        <div class="auth-card">
+            <div class="tabs">
+                <div id="tab-login" class="tab active" onclick="toggleAuth('login')">Login</div>
+                <div id="tab-register" class="tab" onclick="toggleAuth('register')">Register</div>
+            </div>
+            <div id="login-form">
+                <input type="text" id="l-user" placeholder="Username">
+                <input type="password" id="l-pass" placeholder="Password">
+                <button onclick="handleLogin()" class="btn">Start Learning <i class="fas fa-play"></i></button>
+            </div>
+            <div id="register-form" class="hidden">
+                <input type="text" id="r-user" placeholder="Choose Username">
+                <input type="password" id="r-pass" placeholder="Create Password">
+                <button onclick="handleRegister()" class="btn" style="background:var(--accent)">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <aside id="sidebar" class="sidebar">
+        <div class="logo"><i class="fas fa-brain"></i> LearnHub</div>
+        <nav>
+            <div class="nav-item active" onclick="showPage('dash')"><i class="fas fa-chart-line"></i> Dashboard</div>
+            <div class="nav-item" onclick="showPage('words')"><i class="fas fa-list"></i> Vocabulary</div>
+            <div class="nav-item" onclick="showPage('lib')"><i class="fas fa-book-open"></i> Library</div>
+            <div class="nav-item" onclick="showPage('prof')"><i class="fas fa-user-circle"></i> Profile</div>
+            <div class="nav-item" onclick="showPage('sett')"><i class="fas fa-cog"></i> Settings</div>
+            <div style="margin-top: auto; padding: 1rem; border-top: 1px solid #f1f5f9;">
+    <div class="nav-item" onclick="handleLogout()" style="color: #ef4444;">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </div>
+</div>
+        </nav>
+    </aside>
+
+    <main id="main" class="main">
+        <section id="p-dash">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Welcome back, <span id="user-name">Guest</span>! 👋</h1>
+        <div class="badge" style="background: #4f46e5; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem;">Daily Streak: 🔥 3 Days</div>
+    </div>
+
+    <div class="card" style="margin-top:2rem; border-left: 5px solid #4f46e5;">
+        <div style="display:flex; justify-content:space-between">
+            <h3>Learning Progress (Level <span id="lvl">1</span>)</h3>
+            <span id="xp-text" style="font-weight: bold; color: #4f46e5;">0 / 1000 XP</span>
+        </div>
+        <div class="xp-bar" style="background: #e2e8f0; height: 15px; border-radius: 10px; margin: 10px 0;">
+            <div id="xp-fill" class="xp-fill" style="background: linear-gradient(90deg, #4f46e5, #ec4899); height: 100%; width: 0%; transition: 0.5s;"></div>
+        </div>
+        <button onclick="addXP()" class="btn" style="background:#e0e7ff; color:#4f46e5; border: 1px solid #4f46e5;">Study Now (+100 XP)</button>
+    </div>
+
+    <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+        <div class="card" style="text-align: center;">
+            <i class="fas fa-check-circle" style="font-size: 2rem; color: #10b981;"></i>
+            <h4 style="margin-top: 10px;">Words Learned</h4>
+            <h2 id="total-words">124</h2>
+        </div>
+        <div class="card" style="text-align: center;">
+            <i class="fas fa-users" style="font-size: 2rem; color: #3b82f6;"></i>
+            <h4 style="margin-top: 10px;">Friends Online</h4>
+            <div style="display: flex; justify-content: center; gap: 5px; margin-top: 10px;">
+                <div title="Ahmet" style="width: 30px; height: 30px; background: #ddd; border-radius: 50%; border: 2px solid #10b981;"></div>
+                <div title="Ayşe" style="width: 30px; height: 30px; background: #ddd; border-radius: 50%; border: 2px solid #10b981;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+       <section id="p-words" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>📚 Seviye Bazlı Kelimeler</h1>
+        <div style="display: flex; gap: 10px;">
+             <select id="levelSelect" onchange="loadWordsByLevel()" style="padding: 10px; border-radius: 8px; border: 2px solid #6366f1;">
+                <option value="ALL">Tüm Seviyeler</option>
+                <option value="A1">A1 - Başlangıç</option>
+                <option value="A2">A2 - Temel</option>
+                <option value="B1">B1 - Orta</option>
+                <option value="B2">B2 - Orta Üstü</option>
+                <option value="C1">C1 - İleri</option>
+            </select>
+            <input type="text" id="wordSearch" placeholder="Kelime ara..." onkeyup="filterSearch()" style="margin-bottom:0; width: 200px;">
+        </div>
+    </div>
+
+    <div id="words-container" class="grid">
+        </div>
+</section>      
+<section id="p-prof" class="hidden">
+    <div class="card" style="text-align:center; background: linear-gradient(to bottom, #f8fafc, #ffffff);">
+        <div style="position: relative; display: inline-block;">
+            <i class="fas fa-user-circle" style="font-size:7rem; color:#6366f1"></i>
+            <div style="position: absolute; bottom: 5px; right: 5px; background: #10b981; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white;" title="Online"></div>
+        </div>
+        <h2 id="prof-user-detail" style="margin-top:1rem; font-size: 2rem;">Username</h2>
+        <p style="color: #64748b; font-weight: 500;">Intermediate Learner • Level <span class="current-lvl-text">1</span></p>
+        
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 1rem;">
+            <span class="badge" style="background: #e0e7ff; color: #4338ca;">Top 10% this month</span>
+            <span class="badge" style="background: #fef3c7; color: #92400e;">Gold Member</span>
+        </div>
+    </div>
+
+    <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+        <div class="card" style="text-align: center; border-bottom: 4px solid #6366f1;">
+            <i class="fas fa-fire" style="color: #f59e0b; font-size: 1.5rem;"></i>
+            <h4 style="color: #64748b; margin: 10px 0;">Day Streak</h4>
+            <h2 style="font-size: 2rem;">3 Days</h2>
+        </div>
+        <div class="card" style="text-align: center; border-bottom: 4px solid #10b981;">
+            <i class="fas fa-graduation-cap" style="color: #10b981; font-size: 1.5rem;"></i>
+            <h4 style="color: #64748b; margin: 10px 0;">XP Points</h4>
+            <h2 id="prof-xp-total" style="font-size: 2rem;">0</h2>
+        </div>
+        <div class="card" style="text-align: center; border-bottom: 4px solid #ec4899;">
+            <i class="fas fa-medal" style="color: #ec4899; font-size: 1.5rem;"></i>
+            <h4 style="color: #64748b; margin: 10px 0;">Badges</h4>
+            <h2 style="font-size: 2rem;">5</h2>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-award" style="color: #f59e0b;"></i> Achievements</h3>
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;">
+            <div style="text-align: center; width: 80px;">
+                <div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
+                    <i class="fas fa-bolt" style="color: #f59e0b; font-size: 1.5rem;"></i>
+                </div>
+                <small style="font-weight: 600;">Fast Learner</small>
+            </div>
+            <div style="text-align: center; width: 80px;">
+                <div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
+                    <i class="fas fa-book" style="color: #6366f1; font-size: 1.5rem;"></i>
+                </div>
+                <small style="font-weight: 600;">Bookworm</small>
+            </div>
+            <div style="text-align: center; width: 80px; opacity: 0.4;">
+                <div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
+                    <i class="fas fa-star" style="color: #cbd5e1; font-size: 1.5rem;"></i>
+                </div>
+                <small style="font-weight: 600;">Master</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+        <section id="p-sett" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1><i class="fas fa-sliders-h"></i> Settings & Preferences</h1>
+    </div>
+
+    <div class="grid" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+        
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-user-edit"></i> Profile Settings</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#64748b;">Display Name</label>
+                    <input type="text" id="set-display-name" placeholder="Enter name...">
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#64748b;">Email Address</label>
+                    <input type="email" id="set-email" placeholder="example@mail.com">
+                </div>
+            </div>
+            <button onclick="saveSettings('Profile updated!')" class="btn" style="width: auto; margin-top: 1rem; background: #6366f1;">Save Changes</button>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-desktop"></i> App Preferences</h3>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                    <strong>Dark Mode</strong>
+                    <p style="font-size: 0.8rem; color: #64748b;">Switch between light and dark themes</p>
+                </div>
+                <div class="switch" id="dark-mode-toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                    <strong>Email Notifications</strong>
+                    <p style="font-size: 0.8rem; color: #64748b;">Receive weekly progress reports</p>
+                </div>
+                <div class="switch on" id="notif-toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+                <div>
+                    <strong>Public Profile</strong>
+                    <p style="font-size: 0.8rem; color: #64748b;">Allow others to see your rank</p>
+                </div>
+                <div class="switch on" id="privacy-toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 5px solid #ef4444;">
+            <h3 style="margin-bottom: 1.5rem; color: #ef4444;"><i class="fas fa-shield-alt"></i> Security</h3>
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="alert('Password reset link sent to your email!')" class="btn" style="background: #f1f5f9; color: #1e293b; width: auto;">Change Password</button>
+                <button onclick="logout()" class="btn" style="background: #fee2e2; color: #dc2626; width: auto;">Delete Account</button>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+        <section id="p-lib" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>📖 LearnHub Digital Library</h1>
+    </div>
+    <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+        <div class="card book-card" onclick="openStory('A Day in London', 'A1', 'Sarah goes to London. She sees the Big Ben. She drinks tea. She is very happy because London is a beautiful city.')" style="cursor:pointer; text-align:center;">
+            <div style="height: 150px; background: #6366f1; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
+                <i class="fas fa-city fa-3x"></i>
+            </div>
+            <h3 style="margin-top: 15px;">A Day in London</h3>
+            <span class="badge" style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem;">Level: A1</span>
+        </div>
+
+        <div class="card book-card" onclick="openStory('The Mysterious Map', 'B1', 'John found an old map in his grandfathers attic. The map showed a hidden cave near the mountains. He decided to follow the path, not knowing the adventure that awaited him.')" style="cursor:pointer; text-align:center;">
+            <div style="height: 150px; background: #ec4899; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
+                <i class="fas fa-map-marked-alt fa-3x"></i>
+            </div>
+            <h3 style="margin-top: 15px;">The Mysterious Map</h3>
+            <span class="badge" style="background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem;">Level: B1</span>
+        </div>
+    </div>
+</section>
+
+<section id="p-score" class="hidden">
+    <h1>🏆 Global Leaderboard</h1>
+    <div class="card" style="margin-top:2rem">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid #f1f5f9;">
+                    <th style="padding: 10px;">Rank</th>
+                    <th>User</th>
+                    <th>Level</th>
+                    <th>XP</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr>
+                    <td style="padding: 10px;">1</td>
+                    <td>SuperLearner</td>
+                    <td>12</td>
+                    <td><strong>12,450</strong></td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;">2</td>
+                    <td>EnglishMaster</td>
+                    <td>10</td>
+                    <td><strong>9,800</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+    </main>
+
+    <div id="reader">
+        <button onclick="closeBook()" class="btn" style="background:#f1f5f9; color:#1e293b">Close</button>
+        <div style="max-width:800px; margin:2rem auto">
+            <h1 id="rt"></h1><h3 id="rc"></h3><br>
+            <p id="rtxt" style="font-size:1.2rem; line-height:2"></p>
+        </div>
+    </div>
+
+    <script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+        const API = "http://127.0.0.1:8000";
+       // Değişkenlerin hemen altına ekle:
+let token = localStorage.getItem('authToken'); // Token varsa hafızadan al
+let xp = 0;
+let level = 1;
+
+// Sayfa yüklendiğinde çalışacak kontrol
+window.onload = function() {
+    const storedUser = localStorage.getItem('username');
+    
+    // Eğer token ve kullanıcı adı hafızada varsa, otomatik giriş yapılmış gibi davran
+    if (token && storedUser) {
+        // Arayüzü giriş yapılmış hale getir
+        document.getElementById('authOverlay').classList.add('hidden');
+        document.getElementById('sidebar').classList.add('active');
+        document.getElementById('main').classList.add('shifted');
+        
+        // İsimleri yerlerine yaz (Hata almamak için kontrol ekledik)
+        const uName = document.getElementById('user-name');
+        if(uName) uName.innerText = storedUser;
+        
+        const pUser = document.getElementById('prof-user');
+        if(pUser) pUser.innerText = storedUser;
+
+        // Kelimeleri çek
+        getWords();
+    }
+};
+        function toggleAuth(type) {
+            document.getElementById('login-form').classList.toggle('hidden', type !== 'login');
+            document.getElementById('register-form').classList.toggle('hidden', type !== 'register');
+            document.getElementById('tab-login').classList.toggle('active', type === 'login');
+            document.getElementById('tab-register').classList.toggle('active', type === 'register');
+        }
+
+       async function handleRegister() {
+    const username = document.getElementById('r-user').value;
+    const password = document.getElementById('r-pass').value;
+    
+    if(!username || !password) {
+        alert("Lütfen kullanıcı adı ve şifre girin!");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API}/api/auth/register`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username, password})
+        });
+        
+        const data = await res.json();
+        
+        // Backend 'message' veya 'success' dönebilir, ikisini de kontrol edelim
+        if (res.status === 201 || data.success) {
+            alert("Kayıt başarılı! Şimdi giriş yapabilirsin.");
+            toggleAuth('login'); // Otomatik olarak giriş sekmesine atar
+            document.getElementById('l-user').value = username; // Kullanıcı adını doldurur
+        } else {
+            alert("Kayıt hatası: " + (data.message || "Kullanıcı zaten var olabilir."));
+        }
+    } catch(e) {
+        console.error("Hata:", e);
+        alert("Sunucuya bağlanılamadı. Docker'ın çalıştığından emin ol!");
+    }
+}
+
+async function handleLogin() {
+    const username = document.getElementById('l-user').value;
+    const password = document.getElementById('l-pass').value;
+    
+    if(!username || !password) {
+        alert("Lütfen tüm alanları doldurun!");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API}/api/auth/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username, password})
+        });
+        
+        const data = await res.json();
+        console.log("Backend Giriş Yanıtı:", data); // Hata ayıklama için çok önemli
+
+        // Hem 'access_token' hem 'token' isimlerini kontrol ediyoruz
+        const safeToken = data.access_token || data.token;
+
+        if (res.ok && safeToken) {
+            token = safeToken;
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('username', username);
+            
+            // Arayüzü aç
+            document.getElementById('authOverlay').classList.add('hidden');
+            document.getElementById('sidebar').classList.add('active');
+            document.getElementById('main').classList.add('shifted');
+
+          const userNameEl = document.getElementById('user-name');
+if (userNameEl) userNameEl.innerText = username; // Sadece element varsa yaz
+
+const profUserEl = document.getElementById('prof-user');
+if (profUserEl) profUserEl.innerText = username; // Sadece element varsa yaz
+            // Verileri yükle
+            getWords();
+            alert("Hoş geldin " + username + "!");
+        } else {
+            alert("Giriş başarısız: " + (data.message || "Hatalı şifre veya kullanıcı adı."));
+        }
+    } catch(e) {
+        console.error("Login Hatası:", e);
+        alert("Bağlantı hatası! Backend'in 8000 portunda çalıştığından emin ol.");
+    }
+}
+
+
+       function showPage(pageId) {
+    // Tüm sectionları gizle
+    document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+    
+    // Seçilen sectionı göster
+    const target = document.getElementById('p-' + pageId);
+    if(target) target.classList.remove('hidden');
+    
+    // Sidebar menüsünde aktif olanı görsel olarak değiştir
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    // Tıklanan öğeye active classı ekle (Genellikle CSS ile belirginleşir)
+}
+
+
+
+        // Tüm kelimeleri tutacağımız yerel bir liste
+let allWordsList = [];
+
+async function getWords() {
+    const container = document.getElementById('words-container');
+    container.innerHTML = "Yükleniyor...";
+    
+    try {
+        const res = await fetch(`${API}/api/words`, {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+            allWordsList = data.words; // Kelimeleri hafızaya al
+            displayWords(allWordsList); // Ekrana bas
+        }
+    } catch(e) {
+        container.innerHTML = "Hata oluştu.";
+    }
+}
+
+// Kelimeleri Ekrana Basma Fonksiyonu (Seviye ve Arama Desteğiyle)
+function displayWords(wordsToDisplay) {
+    const container = document.getElementById('words-container');
+    
+    if(wordsToDisplay.length === 0) {
+        container.innerHTML = "<div class='card'>Bu seviyede henüz kelime eklenmemiş.</div>";
+        return;
+    }
+
+    container.innerHTML = wordsToDisplay.map(w => `
+        <div class="card word-card-pro" data-level="${w.level}">
+            <div style="display:flex; justify-content:space-between">
+                <h3 style="color:var(--primary)">${w.word}</h3>
+                <span style="background:#e0e7ff; padding:2px 8px; border-radius:5px; font-size:12px;">${w.level}</span>
+            </div>
+            <p style="margin-top:10px"><strong>Anlamı:</strong> ${w.meaning}</p>
+            <p style="font-size:14px; color:#666; font-style:italic; margin-top:5px;">"${w.example}"</p>
+        </div>
+    `).join('');
+}
+
+// Seviye Değiştiğinde Çalışacak Fonksiyon
+function loadWordsByLevel() {
+    const selectedLevel = document.getElementById('levelSelect').value;
+    
+    if(selectedLevel === "ALL") {
+        displayWords(allWordsList);
+    } else {
+        const filtered = allWordsList.filter(w => w.level === selectedLevel);
+        displayWords(filtered);
+    }
+}
+
+// Arama Yapıldığında Çalışacak Fonksiyon
+function filterSearch() {
+    const query = document.getElementById('wordSearch').value.toLowerCase();
+    const selectedLevel = document.getElementById('levelSelect').value;
+    
+    const filtered = allWordsList.filter(w => {
+        const matchesQuery = w.word.toLowerCase().includes(query);
+        const matchesLevel = (selectedLevel === "ALL" || w.level === selectedLevel);
+        return matchesQuery && matchesLevel;
+    });
+    
+    displayWords(filtered);
+}
+
+        function addXP() {
+            xp += 100;
+            if(xp >= 1000) { xp = 0; level++; alert("Level Up!"); }
+            document.getElementById('xp-fill').style.width = (xp/10) + "%";
+            document.getElementById('xp-text').innerText = xp + " / 1000 XP";
+            document.getElementById('lvl').innerText = level;
+        }
+
+       // Kitap Okuma Modunu Açma
+function openStory(title, level, text) {
+    document.getElementById('reader').style.display = 'block';
+    document.getElementById('rt').innerText = title;
+    document.getElementById('rc').innerText = "Difficulty: " + level;
+    document.getElementById('rtxt').innerText = text;
+}
+
+// Kitap Okuma Modunu Kapatma
+function closeBook() {
+    document.getElementById('reader').style.display = 'none';
+}
+// Switch butonlarını açıp kapatma
+function toggleSwitch(el) {
+    el.classList.toggle('on');
+    const settingName = el.id;
+    const isOn = el.classList.contains('on');
+    console.log(`${settingName} is now ${isOn ? 'Enabled' : 'Disabled'}`);
+}
+
+// Ayarları kaydetme simülasyonu
+function saveSettings(message) {
+    const btn = event.target;
+    const originalText = btn.innerText;
+    
+    btn.innerText = "Saving...";
+    btn.disabled = true;
+
+    setTimeout(() => {
+        alert(message);
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }, 1000);
+}
+
+function handleLogout() {
+    if(confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+        // 1. Tarayıcı hafızasındaki her şeyi sil
+        localStorage.clear();
+        
+        // 2. Değişkenleri sıfırla
+        token = null;
+        xp = 0;
+        level = 1;
+
+        // 3. Arayüzü eski haline getir (Giriş ekranını göster)
+        document.getElementById('authOverlay').classList.remove('hidden');
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('main').classList.remove('shifted');
+        
+        // 4. Sayfayı tamamen yenileyerek temiz bir başlangıç yap
+        location.reload();
+    }
+}
+    </script>
+</body>
+</html>
